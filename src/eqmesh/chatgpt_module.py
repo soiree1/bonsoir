@@ -32,12 +32,16 @@ class ChatGPTModule(ChatBaseModule):
     async def generate_response(self, system_prompt, user_prompt):
         template_vars = {
             "history": self.history,
-            "context": self.context,
         }
         template_vars.update(self.template_vars)
 
         system_prompt = Template(system_prompt).substitute(template_vars)
         user_prompt = Template(user_prompt).substitute(template_vars)
+
+        print('=== SYSTEM PROMPT ===')
+        print(system_prompt)
+        print('=== USER PROMPT ===')
+        print(user_prompt)
 
         orig_key = openai.api_key
         messages = [

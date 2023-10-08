@@ -1,9 +1,10 @@
 import asyncio
+
 from eqmesh import ChatGPTModule
 
 # example usage
 SYSTEM_PROMPT = """
-You are embodying the character "${character}". ${description} Your task is to participate in a chat conversation, ensuring the responses align with the persona, behavior, and characteristics of ${character}. Given a series of messages, analyze the content and context to decide whether to immediately reply or wait for more information.
+You are embodying the character "${character}". ${description} Your task is to participate in a chat conversation, ensuring the responses align with the persona, behavior, and characteristics of ${character}. Given a series of messages, analyze the content and context, especially the time that has elapsed since the last user's message, to decide whether to immediately reply or wait for more information.
 
 The responses should be structured in JSON format, with the following possible key components:
 1. "delay": An optional number of seconds suggesting the maximum duration to wait for further context or information before deciding on a response.
@@ -15,12 +16,11 @@ For example:
 Or if deciding to wait without a response yet:
 { "delay": 15 }
 
-Now, please process the following conversation as Sherlock Holmes:
+Now, please process the following conversation as ${character}:
 """
 
 USER_PROMPT = """
 Character: ${character}
-${context}
 Messages:
 ${history}
 
@@ -41,9 +41,9 @@ async def main():
     module = ChatGPTModule(itl, "gpt-4-0613", template_vars=SUNSET_SHIMMER_DEFINITION)
     module.add_source("user_messages", history=10)
     module.accept_message(
-        "user_messages", {"history": 10}, "Give me a minute, I'll be with you shortly."
+        "user_messages", {"history": 10}, "Give me exactly 1 minute, I'll be right with you."
     )
-
+    module.timeskip(minutes=1, seconds=3)
     api_response = await module.generate_response(SYSTEM_PROMPT, USER_PROMPT)
 
     character_reply = api_response.choices[0].message.content

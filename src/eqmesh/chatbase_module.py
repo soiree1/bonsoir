@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 import heapq
 import json
 import os
@@ -41,17 +41,14 @@ class ChatBaseModule(GPTBaseModule):
         self.messages = defaultdict(list)
         self._history = None
         self._last_timestamps = {}
+        self._time_offset = timedelta(seconds=0)
 
     def accept_message(self, source: str, metadata: dict, message: str):
-        orig_timestamp = datetime.now()
+        orig_timestamp = datetime.now() + self._time_offset
         self._last_timestamps[source] = orig_timestamp
 
-        chat_time = orig_timestamp.replace(microsecond=0)
-        encoded_time = chat_time.isoformat()
         encoded_message = json.dumps(message)
-
-        chat_line = f"- [{encoded_time}] [{source}]: {encoded_message}"
-        self.messages[source].append((orig_timestamp, source, chat_line))
+        self.messages[source].append((orig_timestamp, source, encoded_message))
 
         if len(self.messages[source]) > metadata["history"]:
             self.messages[source].pop(0)
@@ -77,7 +74,11 @@ class ChatBaseModule(GPTBaseModule):
 
         # Keep adding the oldest message to the history
         while candidates:
-            _, source, chat_line = heapq.heappop(candidates)
+            timestamp, source, message = heapq.heappop(candidates)
+            relative_time = human_readable_timedelta(datetime.now() - timestamp + self._time_offset)
+            # Note: putting the time info after the message seems to work much better than before
+            chat_line = f"- [{source}]: {message} [Sent {relative_time} ago]"
+
             result.append(chat_line)
             if used_messages[source] < len(self.messages[source]):
                 heapq.heappush(candidates, self.messages[source][used_messages[source]])
@@ -86,18 +87,14 @@ class ChatBaseModule(GPTBaseModule):
         self._history = "\n".join(result)
         return self._history
 
-    @property
-    def context(self):
-        result = []
+    def timeskip(self, days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
+        self._time_offset += timedelta(
+            days=days,
+            seconds=seconds,
+            microseconds=microseconds,
+            milliseconds=milliseconds,
+            minutes=minutes,
+            hours=hours,
+            weeks=weeks,
+        )
 
-        for stream in self.source_metadata:
-            key = f"Time Since Last {stream} Message"
-            if stream in self._last_timestamps:
-                value = human_readable_timedelta(
-                    datetime.now() - self._last_timestamps[stream]
-                )
-            else:
-                value = "No previous message"
-            result.append(f"{key}: {value}")
-
-        return "\n".join(result)
