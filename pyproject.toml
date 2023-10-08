@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "eqmesh"
+version = "0.0.1"
+authors = [
+  { name="Synthbot Anon", email="synthbot@celestia.ai" },
+]
+description = ""
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "openai"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+]
+
