@@ -4,6 +4,8 @@ import heapq
 import json
 import os
 
+from itllib import Itl
+
 from .gptbase_module import GPTBaseModule
 
 
@@ -36,14 +38,18 @@ def human_readable_timedelta(td):
 
 
 class ChatBaseModule(GPTBaseModule):
-    def __init__(self, itl, *args, **kwargs):
+    def __init__(self, itl: Itl, *args, **kwargs):
         super().__init__(itl, *args, **kwargs)
         self.messages = defaultdict(list)
         self._history = None
         self._last_timestamps = {}
         self._time_offset = timedelta(seconds=0)
+        self._names = {}
 
     def accept_message(self, source: str, metadata: dict, message: str):
+        if "name" in metadata:
+            self._names[source] = metadata["name"]
+
         orig_timestamp = datetime.now() + self._time_offset
         self._last_timestamps[source] = orig_timestamp
 
@@ -75,9 +81,12 @@ class ChatBaseModule(GPTBaseModule):
         # Keep adding the oldest message to the history
         while candidates:
             timestamp, source, message = heapq.heappop(candidates)
-            relative_time = human_readable_timedelta(datetime.now() - timestamp + self._time_offset)
+            relative_time = human_readable_timedelta(
+                datetime.now() - timestamp + self._time_offset
+            )
+            name = self._names.get(source, source)
             # Note: putting the time info after the message seems to work much better than before
-            chat_line = f"- [{source}]: {message} [Sent {relative_time} ago]"
+            chat_line = f"- [{name}]: {message} [Sent {relative_time} ago]"
 
             result.append(chat_line)
             if used_messages[source] < len(self.messages[source]):
@@ -87,7 +96,16 @@ class ChatBaseModule(GPTBaseModule):
         self._history = "\n".join(result)
         return self._history
 
-    def timeskip(self, days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0):
+    def timeskip(
+        self,
+        days=0,
+        seconds=0,
+        microseconds=0,
+        milliseconds=0,
+        minutes=0,
+        hours=0,
+        weeks=0,
+    ):
         self._time_offset += timedelta(
             days=days,
             seconds=seconds,
@@ -97,4 +115,3 @@ class ChatBaseModule(GPTBaseModule):
             hours=hours,
             weeks=weeks,
         )
-

@@ -1,6 +1,9 @@
 import asyncio
+import os
+import yaml
 
 from eqmesh import ChatGPTModule
+from itllib import Itl
 
 # example usage
 SYSTEM_PROMPT = """
@@ -33,21 +36,31 @@ SUNSET_SHIMMER_DEFINITION = {
 }
 
 
-async def main():
-    from itllib import Itl
-
+def create_itl():
     itl = Itl()
 
-    module = ChatGPTModule(itl, "gpt-4-0613", template_vars=SUNSET_SHIMMER_DEFINITION)
-    module.add_source("user_messages", history=10)
-    module.accept_message(
-        "user_messages", {"history": 10}, "Give me exactly 1 minute, I'll be right with you."
-    )
-    module.timeskip(minutes=1, seconds=3)
-    api_response = await module.generate_response(SYSTEM_PROMPT, USER_PROMPT)
+    path = os.path.dirname(__file__)
+    with open(os.path.join(path, "config.yaml"), "r") as f:
+        config = yaml.safe_load(f)
 
-    character_reply = api_response.choices[0].message.content
-    print(character_reply)
+    itl.apply_config(config, os.path.join(path, "secrets"))
+
+    return itl
+
+
+async def main():
+    itl = create_itl()
+
+    module = ChatGPTModule(itl, "gpt-4-0613", template_vars=SUNSET_SHIMMER_DEFINITION)
+    module.add_source("user-messages", history=10, name="Anonymous")
+    module.add_source("sunset-shimmer", history=10, name="Sunset Shimmer")
+    module.add_reactive_response(
+        "user-messages", "sunset-shimmer", SYSTEM_PROMPT, USER_PROMPT
+    )
+
+    itl.start_thread()
+    while True:
+        await asyncio.sleep(10)
 
 
 if __name__ == "__main__":

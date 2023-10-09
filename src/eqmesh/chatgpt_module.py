@@ -18,7 +18,9 @@ DEFAULT_API_KEY = os.environ.get("OPENAI_API_KEY", None)
 
 
 class ChatGPTModule(ChatBaseModule):
-    def __init__(self, itl, model, api_key=None, template_vars={}, *args, **kwargs):
+    def __init__(
+        self, itl: Itl, model: str, api_key=None, template_vars={}, *args, **kwargs
+    ):
         super().__init__(itl, *args, **kwargs)
 
         if api_key is None:
@@ -37,11 +39,6 @@ class ChatGPTModule(ChatBaseModule):
 
         system_prompt = Template(system_prompt).substitute(template_vars)
         user_prompt = Template(user_prompt).substitute(template_vars)
-
-        print('=== SYSTEM PROMPT ===')
-        print(system_prompt)
-        print('=== USER PROMPT ===')
-        print(user_prompt)
 
         orig_key = openai.api_key
         messages = [
@@ -62,4 +59,4 @@ class ChatGPTModule(ChatBaseModule):
         finally:
             openai.api_key = orig_key
 
-        return response
+        return response.choices[0].message.content.message
