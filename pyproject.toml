@@ -2,6 +2,9 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project]
 name = "eqmesh"
 version = "0.0.1"
@@ -12,7 +15,9 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
-    "openai"
+    "openai",
+    "itllib@git+https://github.com/ThatOneAI/itllib",
+    "itlmon@git+https://github.com/ThatOneAI/itlmon"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

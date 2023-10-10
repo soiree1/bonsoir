@@ -45,10 +45,10 @@ class ChatBaseModule(GPTBaseModule):
         self._last_timestamps = {}
         self._time_offset = timedelta(seconds=0)
         self._names = {}
+        self._name_references = defaultdict(object)
 
     def accept_message(self, source: str, metadata: dict, message: str):
-        if "name" in metadata:
-            self._names[source] = metadata["name"]
+        self._names[source] = metadata.get("name", source)
 
         orig_timestamp = datetime.now() + self._time_offset
         self._last_timestamps[source] = orig_timestamp
@@ -56,10 +56,14 @@ class ChatBaseModule(GPTBaseModule):
         encoded_message = json.dumps(message)
         self.messages[source].append((orig_timestamp, source, encoded_message))
 
-        if len(self.messages[source]) > metadata["history"]:
+        if len(self.messages[source]) > metadata.get("history", 1):
             self.messages[source].pop(0)
 
         self._history = None
+
+    def append_history(self, name, message):
+        reference = self._name_references[name]
+        self.accept_message(reference, {"name": name}, message)
 
     @property
     def history(self):

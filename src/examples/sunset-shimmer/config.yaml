@@ -1,6 +1,0 @@
-streams:
-- name: user-messages
-  source: ws://streams.thatone.ai:30000/api/connect/soiree-demo1/user-messages
-- name: sunset-shimmer
-  source: ws://streams.thatone.ai:30000/api/connect/soiree-demo1/sunset-shimmer
-

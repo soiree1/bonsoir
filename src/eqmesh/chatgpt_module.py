@@ -56,7 +56,8 @@ class ChatGPTModule(ChatBaseModule):
                     model=self.model, messages=messages
                 ),
             )
+
+            return response.choices[0].message.content
+
         finally:
             openai.api_key = orig_key
-
-        return response.choices[0].message.content.message
