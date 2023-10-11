@@ -1,0 +1,22 @@
+from ubuntu:22.04
+
+RUN apt update --fix-missing
+RUN apt install -y \
+    sudo python3 python3-pip git
+
+# Add a default user
+RUN adduser --disabled-password --gecos "" celestia
+RUN echo "celestia ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/celestia
+
+# Copy in eqmesh
+COPY ./ /home/celestia/eqmesh
+RUN chown -R celestia /home/celestia/eqmesh
+
+# Install eqmesh
+USER celestia
+RUN pip install --upgrade /home/celestia/eqmesh
+
+# Entrypoint
+WORKDIR /home/celestia
+ENTRYPOINT bash
+

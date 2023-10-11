@@ -110,7 +110,7 @@ async def main():
         user_prompt=USER_PROMPT,
     )
     module.add_reaction("user-messages", "sunset-shimmer")
-    await module.set_regular_response("sunset-shimmer", timedelta(seconds=5))
+    await module.set_generate_interval("sunset-shimmer", timedelta(seconds=60))
 
     itl.start_thread()
 

@@ -36,26 +36,26 @@ class GPTBaseModule:
         self._current_interval_response = defaultdict(lambda: None)
         self._active_cycles = defaultdict(int)
 
-    def add_upstream(self, source: str, **kwargs):
-        if source in self.source_metadata:
-            raise ValueError(f"Source {source} already exists")
-        self.source_metadata[source] = kwargs
+    def add_upstream(self, upstream: str, **kwargs):
+        if upstream in self.source_metadata:
+            raise ValueError(f"Upstream {upstream} already exists")
+        self.source_metadata[upstream] = kwargs
 
-        @self.itl.ondata(source)
+        @self.itl.ondata(upstream)
         async def receive_message(data):
-            data = await self.preprocessor(self, source, data)
+            data = await self.preprocessor(self, upstream, data)
             if data != None:
-                metadata = self.source_metadata[source]
-                self.accept_message(source, metadata, data)
+                metadata = self.source_metadata[upstream]
+                self.accept_message(upstream, metadata, data)
 
-    def add_downstream(self, dest: str, **kwargs):
-        if dest in self.dest_metadata:
-            raise ValueError(f"Sink {dest} already exists")
-        self.dest_metadata[dest] = kwargs
+    def add_downstream(self, downstream: str, **kwargs):
+        if downstream in self.dest_metadata:
+            raise ValueError(f"Downstream {downstream} already exists")
+        self.dest_metadata[downstream] = kwargs
 
     def add_reaction(self, upstream, downstream):
         if downstream not in self.dest_metadata:
-            raise ValueError(f"Sink {downstream} does not exist")
+            raise ValueError(f"Downstream {downstream} does not exist. Make sure to call add_downstream first.")
 
         @self.itl.ondata(upstream)
         async def receive_message(*unused_args, **unused_kwargs):
@@ -91,9 +91,9 @@ class GPTBaseModule:
     def delayed_maybe_respond(self, downstream: str, interval: timedelta):
         self._current_interval_response[downstream] = interval
 
-    async def set_regular_response(self, downstream: str, new_interval: timedelta):
+    async def set_generate_interval(self, downstream: str, new_interval: timedelta):
         if downstream not in self.dest_metadata:
-            raise ValueError(f"Sink {downstream} does not exist")
+            raise ValueError(f"Downstream {downstream} does not exist")
 
         self._default_interval_response[downstream] = new_interval
         if downstream not in self._current_interval_response:
