@@ -14,7 +14,7 @@ That will create a config.yaml file to connect to the bot.
 
 To connect:
 ```bash
-docker exec -it $(docker ps  --filter ancestor=synthbot/eqmesh:v0.1.0 -n1 -q)
+docker exec -it $(docker ps  --filter ancestor=synthbot/eqmesh:v0.1.0 -n1 -q) bash
 
 python3 -m itlmon --config config.yaml
 # IMPORTANT: if you restart the chatbot, it will regenerate a new config.yaml
