@@ -8,13 +8,13 @@ RUN apt install --fix-missing -y \
 RUN adduser --disabled-password --gecos "" celestia
 RUN echo "celestia ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/celestia
 
-# Copy in eqmesh
-COPY ./ /home/celestia/eqmesh
-RUN chown -R celestia /home/celestia/eqmesh
+# Copy in bonsoir
+COPY ./ /home/celestia/bonsoir
+RUN chown -R celestia /home/celestia/bonsoir
 
-# Install eqmesh
+# Install bonsoir
 USER celestia
-RUN pip install --upgrade /home/celestia/eqmesh
+RUN pip install --upgrade /home/celestia/bonsoir
 
 # Entrypoint
 WORKDIR /home/celestia

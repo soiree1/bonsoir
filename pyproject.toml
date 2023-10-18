@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [project]
-name = "eqmesh"
+name = "bonsoir"
 version = "0.0.1"
 authors = [
   { name="Synthbot Anon", email="synthbot@celestia.ai" },

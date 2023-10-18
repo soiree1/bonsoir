@@ -4,53 +4,38 @@ import os
 import random
 import yaml
 
-from transformers.tools import OpenAiAgent
+from transformers.tools import OpenAiAgent, Tool
 from itllib import Itl
 
-LOOP = os.environ.get("LOOP_ID", random.randbytes(32).hex())
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.yaml")
+SECRETS_PATH = "./secrets"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", None)
 
 
-def create_itl(write_fn: str):
-    # itl = "in-the-loop". It represents a node in the mesh that can send and receive
-    # messages.
-    itl = Itl()
-
-    streams = [
-        {
-            "name": "one-off-requests",
-            "source": f"ws://streams.thatone.ai:30000/api/connect/{LOOP}/one-off-requests",
-        },
-        {
-            "name": "chat-requests",
-            "source": f"ws://streams.thatone.ai:30000/api/connect/{LOOP}/chat-requests",
-        },
-        {
-            "name": "reset-chat",
-            "source": f"ws://streams.thatone.ai:30000/api/connect/{LOOP}/reset-chat",
-        },
-        {
-            "name": "responses",
-            "source": f"ws://streams.thatone.ai:30000/api/connect/{LOOP}/responses",
-        },
-    ]
-
-    # Add one stream for user messages and one for the agent's responses.
-    itl.update_streams(streams)
-
-    with open(write_fn, "w") as outp:
-        yaml.safe_dump({"streams": streams}, outp)
-
-    return itl
-
-
-itl = create_itl("config-assistant.yaml")
+itl = Itl()
+itl.apply_config(CONFIG_PATH, SECRETS_PATH)
 itl.start_thread()
 
 executor = ThreadPoolExecutor(max_workers=1)
 agent = OpenAiAgent(model="gpt-4-0613", api_key=OPENAI_API_KEY)
-loop = asyncio.get_event_loop()
+agent.toolbox.clear()
 
+class Greeter(Tool):
+    def __init__(self):
+        super().__init__()
+        self.name = 'greeter'
+        self.description = (
+            "This is a tool that greets the user. "
+            "It takes an input named `username` which should be a "
+            "string representation of the user's name. It "
+            "returns a text that contains the greeting."
+        )
+    def __call__(self, username: str):
+        return f'Hello, {username}!'
+
+agent.toolbox['greeter'] = Greeter()
+
+loop = asyncio.get_event_loop()
 
 @itl.ondata("one-off-requests")
 async def handle_one_off_request(request):
