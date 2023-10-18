@@ -11,13 +11,13 @@ from string import Template
 from itllib import Itl
 import openai
 
-from .chatbase_module import ChatBaseModule
+from .chatagentbase_module import ChatAgentBaseModule
 
 
 DEFAULT_API_KEY = os.environ.get("OPENAI_API_KEY", None)
 
 
-class ChatGPTModule(ChatBaseModule):
+class ChatGPTAgentModule(ChatAgentBaseModule):
     def __init__(
         self, itl: Itl, model: str, api_key=None, template_vars={}, *args, **kwargs
     ):

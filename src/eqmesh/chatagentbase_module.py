@@ -2,11 +2,10 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 import heapq
 import json
-import os
 
 from itllib import Itl
 
-from .gptbase_module import GPTBaseModule
+from .agentbase_module import AgentBaseModule
 
 
 def human_readable_timedelta(td):
@@ -37,7 +36,7 @@ def human_readable_timedelta(td):
         return "Just now"
 
 
-class ChatBaseModule(GPTBaseModule):
+class ChatAgentBaseModule(AgentBaseModule):
     def __init__(self, itl: Itl, *args, **kwargs):
         super().__init__(itl, *args, **kwargs)
         self.messages = defaultdict(list)

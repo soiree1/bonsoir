@@ -1,4 +1,4 @@
-from .gptbase_module import GPTBaseModule
-from .chatgpt_module import ChatGPTModule
-from .chatbase_module import ChatBaseModule
+from .agentbase_module import AgentBaseModule
+from .chatgptagent_module import ChatGPTAgentModule
+from .chatagentbase_module import ChatAgentBaseModule
 from .llamacpp_module import LlamaCppModule

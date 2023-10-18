@@ -9,10 +9,10 @@ from string import Template
 
 from itllib import Itl
 
-from .chatbase_module import ChatBaseModule
+from .chatagentbase_module import ChatAgentBaseModule
 
 
-class LlamaCppModule(ChatBaseModule):
+class LlamaCppModule(ChatAgentBaseModule):
     def __init__(self, itl: Itl, llm, template_vars={}, *args, **kwargs):
         super().__init__(itl, *args, **kwargs)
         self.llm = llm

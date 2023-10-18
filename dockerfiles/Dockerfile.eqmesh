@@ -1,7 +1,7 @@
 from ubuntu:22.04
 
-RUN apt update --fix-missing
-RUN apt install -y \
+RUN apt update
+RUN apt install --fix-missing -y \
     sudo python3 python3-pip git
 
 # Add a default user

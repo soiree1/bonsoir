@@ -1,0 +1,5 @@
+streams:
+- name: user-messages
+  loop: soiree-demo-loop
+- name: sunset-shimmer
+  loop: soiree-demo-loop

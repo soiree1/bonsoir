@@ -5,9 +5,12 @@ import os
 import random
 import yaml
 
-from eqmesh import ChatGPTModule
+from eqmesh import ChatGPTAgentModule
 from itllib import Itl
 
+
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.yaml")
+SECRETS_PATH = "./secrets"
 
 CHARACTER_DEFINITION = {
     "character": "Sunset Shimmer",
@@ -41,33 +44,9 @@ Decision: Based on the context and timing, decide whether to immediately respond
 """
 
 
-def create_itl(write_fn: str):
-    # itl = "in-the-loop". It represents a node in the mesh that can send and receive
-    # messages.
-    itl = Itl()
-
-    streams = [
-        {
-            "name": "user-messages",
-            "source": f"ws://streams.thatone.ai:30000/api/connect/{LOOP}/user-messages",
-        },
-        {
-            "name": "sunset-shimmer",
-            "source": f"ws://streams.thatone.ai:30000/api/connect/{LOOP}/sunset-shimmer",
-        },
-    ]
-
-    # Add one stream for user messages and one for the agent's responses.
-    itl.update_streams(streams)
-
-    with open(write_fn, "w") as outp:
-        yaml.safe_dump({"streams": streams}, outp)
-
-    return itl
-
-
-async def postprocessor(module: ChatGPTModule, downstream, message):
+async def postprocessor(module: ChatGPTAgentModule, downstream, message):
     try:
+        print("generated response:", message)
         message = json.loads(message)
 
         if "message" in message:
@@ -94,9 +73,10 @@ async def postprocessor(module: ChatGPTModule, downstream, message):
 
 
 async def main():
-    itl = create_itl("config.yaml")
+    itl = Itl()
+    itl.apply_config(CONFIG_PATH, SECRETS_PATH)
 
-    module = ChatGPTModule(
+    module = ChatGPTAgentModule(
         itl,
         "gpt-4-0613",
         template_vars=CHARACTER_DEFINITION,
